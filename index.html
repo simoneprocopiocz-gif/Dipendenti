@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)file:///C:/Users/Utente/Desktop/Calendario%20Presenze.html -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario Presenze</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f3f6fa;
+        color: #222;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #1f3c88;
+    }
+
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    button {
+        border: none;
+        border-radius: 7px;
+        padding: 10px 16px;
+        font-size: 15px;
+        cursor: pointer;
+        background: #1f3c88;
+        color: white;
+    }
+
+    button:hover {
+        opacity: 0.85;
+    }
+
+    .btn-green {
+        background: #198754;
+    }
+
+    .btn-red {
+        background: #dc3545;
+    }
+
+    .btn-gray {
+        background: #6c757d;
+    }
+
+    #meseAnno {
+        font-size: 22px;
+        font-weight: bold;
+        min-width: 220px;
+        text-align: center;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 900px;
+    }
+
+    th, td {
+        border: 1px solid #d7dce2;
+        text-align: center;
+        padding: 8px;
+    }
+
+    th {
+        background: #1f3c88;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .nome {
+        text-align: left;
+        min-width: 190px;
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 1;
+        font-weight: bold;
+    }
+
+    th.nome {
+        background: #1f3c88;
+        z-index: 4;
+    }
+
+    .totale {
+        min-width: 100px;
+        position: sticky;
+        right: 0;
+        background: white;
+        font-weight: bold;
+        z-index: 1;
+    }
+
+    th.totale {
+        background: #1f3c88;
+        z-index: 4;
+    }
+
+    .giorno {
+        min-width: 48px;
+        height: 48px;
+        cursor: pointer;
+        font-weight: bold;
+        user-select: none;
+    }
+
+    .presente {
+        background: #d9f7df;
+        color: #198754;
+    }
+
+    .assente {
+        background: #ffd9dd;
+        color: #dc3545;
+    }
+
+    .weekend {
+        background: #eeeeee !important;
+        color: #777;
+    }
+
+    .oggi {
+        outline: 3px solid #ffc107;
+        outline-offset: -3px;
+    }
+
+    .form-area {
+        display: none;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.1);
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .form-area input {
+        padding: 11px;
+        font-size: 16px;
+        width: 280px;
+        max-width: 100%;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+    }
+
+    .info {
+        text-align: center;
+        margin-top: 15px;
+        color: #555;
+    }
+
+    .nessun-dipendente {
+        padding: 30px;
+        text-align: center;
+        color: #777;
+    }
+
+    .azioni {
+        margin-left: 10px;
+        padding: 5px 8px;
+        font-size: 12px;
+        background: #dc3545;
+    }
+
+    @media (max-width: 700px) {
+        .container {
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+        }
+
+        #meseAnno {
+            font-size: 18px;
+        }
+
+        .toolbar {
+            gap: 6px;
+        }
+
+        button {
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📅 Calendario Presenze</h1>
+
+    <div class="toolbar">
+        <button onclick="mesePrecedente()">◀ Mese precedente</button>
+
+        <div id="meseAnno">Ottobre 2026</div>
+
+        <button onclick="meseSuccessivo()">Mese successivo ▶</button>
+
+        <button class="btn-green" onclick="mostraForm()">
+            ➕ Aggiungi dipendente
+        </button>
+
+        <button class="btn-gray" onclick="tornaAlMeseCorrente()">
+            📅 Oggi
+        </button>
+    </div>
+
+    <div id="formArea" class="form-area" style="display: none;">
+        <h3>Nuovo dipendente</h3>
+
+        <input type="text" id="nomeDipendente" placeholder="Nome e cognome" maxlength="100">
+
+        <br><br>
+
+        <button class="btn-green" onclick="aggiungiDipendente()">
+            Salva dipendente
+        </button>
+
+        <button class="btn-gray" onclick="nascondiForm()">
+            Annulla
+        </button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="calendario">
+            <thead><tr><th class="nome">Dipendente</th><th class="giorno">1<br><small>Gio</small></th><th class="giorno">2<br><small>Ven</small></th><th class="giorno" style="background: rgb(119, 119, 119);">3<br><small>Sab</small></th><th class="giorno" style="background: rgb(119, 119, 119);">4<br><small>Dom</small></th><th class="giorno">5<br><small>Lun</small></th><th class="giorno">6<br><small>Mar</small></th><th class="giorno">7<br><small>Mer</small></th><th class="giorno" style="background: rgb(211, 158, 0);">8<br><small>Gio</small></th><th class="giorno">9<br><small>Ven</small></th><th class="giorno" style="background: rgb(119, 119, 119);">10<br><small>Sab</small></th><th class="giorno" style="background: rgb(119, 119, 119);">11<br><small>Dom</small></th><th class="giorno">12<br><small>Lun</small></th><th class="giorno">13<br><small>Mar</small></th><th class="giorno">14<br><small>Mer</small></th><th class="giorno">15<br><small>Gio</small></th><th class="giorno">16<br><small>Ven</small></th><th class="giorno" style="background: rgb(119, 119, 119);">17<br><small>Sab</small></th><th class="giorno" style="background: rgb(119, 119, 119);">18<br><small>Dom</small></th><th class="giorno">19<br><small>Lun</small></th><th class="giorno">20<br><small>Mar</small></th><th class="giorno">21<br><small>Mer</small></th><th class="giorno">22<br><small>Gio</small></th><th class="giorno">23<br><small>Ven</small></th><th class="giorno" style="background: rgb(119, 119, 119);">24<br><small>Sab</small></th><th class="giorno" style="background: rgb(119, 119, 119);">25<br><small>Dom</small></th><th class="giorno">26<br><small>Lun</small></th><th class="giorno">27<br><small>Mar</small></th><th class="giorno">28<br><small>Mer</small></th><th class="giorno">29<br><small>Gio</small></th><th class="giorno">30<br><small>Ven</small></th><th class="giorno" style="background: rgb(119, 119, 119);">31<br><small>Sab</small></th><th class="totale">Totale A</th></tr></thead>
+            <tbody><tr><td class="nome">Annarita <button class="azioni" onclick="eliminaDipendente(1791477424142)">✕</button></td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente oggi">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="totale" style="color: rgb(25, 135, 84);">0</td></tr><tr><td class="nome">Domenico <button class="azioni" onclick="eliminaDipendente(1791477435510)">✕</button></td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente oggi">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="totale" style="color: rgb(25, 135, 84);">0</td></tr><tr><td class="nome">Saverio <button class="azioni" onclick="eliminaDipendente(1791477439910)">✕</button></td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente oggi">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="totale" style="color: rgb(25, 135, 84);">0</td></tr><tr><td class="nome">Fatima <button class="azioni" onclick="eliminaDipendente(1791477444510)">✕</button></td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente oggi">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="totale" style="color: rgb(25, 135, 84);">0</td></tr><tr><td class="nome">Nello <button class="azioni" onclick="eliminaDipendente(1791477464926)">✕</button></td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente oggi">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente weekend">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente">✓</td><td class="giorno presente weekend">✓</td><td class="totale" style="color: rgb(25, 135, 84);">0</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="info">
+        🟢 Presente &nbsp;&nbsp; 🔴 A = Assente &nbsp;&nbsp; ⚪ Weekend
+        <br><br>
+        I dati vengono salvati automaticamente nel browser.
+    </div>
+
+</div>
+
+<script>
+
+let dataCorrente = new Date();
+
+let dipendenti = JSON.parse(
+    localStorage.getItem("dipendenti")
+) || [];
+
+let assenze = JSON.parse(
+    localStorage.getItem("assenze")
+) || {};
+
+
+/* ============================
+   SALVATAGGIO
+============================ */
+
+function salvaDati() {
+    localStorage.setItem(
+        "dipendenti",
+        JSON.stringify(dipendenti)
+    );
+
+    localStorage.setItem(
+        "assenze",
+        JSON.stringify(assenze)
+    );
+}
+
+
+/* ============================
+   FORM DIPENDENTE
+============================ */
+
+function mostraForm() {
+    document.getElementById("formArea").style.display = "block";
+
+    setTimeout(() => {
+        document.getElementById("nomeDipendente").focus();
+    }, 100);
+}
+
+function nascondiForm() {
+    document.getElementById("formArea").style.display = "none";
+    document.getElementById("nomeDipendente").value = "";
+}
+
+function aggiungiDipendente() {
+
+    const input = document.getElementById("nomeDipendente");
+
+    const nome = input.value.trim();
+
+    if (!nome) {
+        alert("Inserisci il nome del dipendente.");
+        return;
+    }
+
+    dipendenti.push({
+        id: Date.now(),
+        nome: nome
+    });
+
+    salvaDati();
+
+    input.value = "";
+
+    nascondiForm();
+
+    creaCalendario();
+}
+
+
+/* ============================
+   ELIMINA DIPENDENTE
+============================ */
+
+function eliminaDipendente(id) {
+
+    const dipendente = dipendenti.find(d => d.id === id);
+
+    if (!dipendente) return;
+
+    const conferma = confirm(
+        "Vuoi eliminare " + dipendente.nome + "?"
+    );
+
+    if (!conferma) return;
+
+    dipendenti = dipendenti.filter(
+        d => d.id !== id
+    );
+
+    // Elimina anche le sue assenze
+    Object.keys(assenze).forEach(chiave => {
+
+        if (chiave.startsWith(id + "_")) {
+            delete assenze[chiave];
+        }
+
+    });
+
+    salvaDati();
+
+    creaCalendario();
+}
+
+
+/* ============================
+   CALENDARIO
+============================ */
+
+function creaCalendario() {
+
+    const anno = dataCorrente.getFullYear();
+    const mese = dataCorrente.getMonth();
+
+    const nomiMesi = [
+        "Gennaio",
+        "Febbraio",
+        "Marzo",
+        "Aprile",
+        "Maggio",
+        "Giugno",
+        "Luglio",
+        "Agosto",
+        "Settembre",
+        "Ottobre",
+        "Novembre",
+        "Dicembre"
+    ];
+
+    document.getElementById("meseAnno").textContent =
+        nomiMesi[mese] + " " + anno;
+
+    const primoGiorno =
+        new Date(anno, mese, 1);
+
+    const ultimoGiorno =
+        new Date(anno, mese + 1, 0);
+
+    const numeroGiorni =
+        ultimoGiorno.getDate();
+
+    const thead =
+        document.querySelector("#calendario thead");
+
+    const tbody =
+        document.querySelector("#calendario tbody");
+
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+
+
+    /* INTESTAZIONE */
+
+    const rigaHeader =
+        document.createElement("tr");
+
+    const thNome =
+        document.createElement("th");
+
+    thNome.className = "nome";
+    thNome.textContent = "Dipendente";
+
+    rigaHeader.appendChild(thNome);
+
+
+    const giorniSettimana = [
+        "Dom",
+        "Lun",
+        "Mar",
+        "Mer",
+        "Gio",
+        "Ven",
+        "Sab"
+    ];
+
+
+    for (let giorno = 1; giorno <= numeroGiorni; giorno++) {
+
+        const data =
+            new Date(anno, mese, giorno);
+
+        const th =
+            document.createElement("th");
+
+        th.className = "giorno";
+
+        const giornoSettimana =
+            giorniSettimana[data.getDay()];
+
+        th.innerHTML =
+            giorno + "<br>" +
+            "<small>" + giornoSettimana + "</small>";
+
+        if (data.getDay() === 0 ||
+            data.getDay() === 6) {
+
+            th.style.background = "#777";
+        }
+
+        // Evidenzia oggi
+        const oggi = new Date();
+
+        if (
+            giorno === oggi.getDate() &&
+            mese === oggi.getMonth() &&
+            anno === oggi.getFullYear()
+        ) {
+            th.style.background = "#d39e00";
+        }
+
+        rigaHeader.appendChild(th);
+    }
+
+
+    const thTotale =
+        document.createElement("th");
+
+    thTotale.className = "totale";
+    thTotale.textContent = "Totale A";
+
+    rigaHeader.appendChild(thTotale);
+
+    thead.appendChild(rigaHeader);
+
+
+    /* NESSUN DIPENDENTE */
+
+    if (dipendenti.length === 0) {
+
+        const tr =
+            document.createElement("tr");
+
+        const td =
+            document.createElement("td");
+
+        td.colSpan = numeroGiorni + 2;
+
+        td.className = "nessun-dipendente";
+
+        td.innerHTML =
+            "Nessun dipendente presente.<br>" +
+            "Clicca su <b>➕ Aggiungi dipendente</b> per iniziare.";
+
+        tr.appendChild(td);
+
+        tbody.appendChild(tr);
+
+        return;
+    }
+
+
+    /* RIGHE DIPENDENTI */
+
+    dipendenti.forEach(dipendente => {
+
+        const tr =
+            document.createElement("tr");
+
+
+        /* NOME */
+
+        const tdNome =
+            document.createElement("td");
+
+        tdNome.className = "nome";
+
+        tdNome.innerHTML =
+            escapeHtml(dipendente.nome) +
+            ' <button class="azioni" ' +
+            'onclick="eliminaDipendente(' +
+            dipendente.id +
+            ')">✕</button>';
+
+        tr.appendChild(tdNome);
+
+
+        let totaleAssenze = 0;
+
+
+        /* GIORNI */
+
+        for (
+            let giorno = 1;
+            giorno <= numeroGiorni;
+            giorno++
+        ) {
+
+            const data =
+                new Date(anno, mese, giorno);
+
+            const td =
+                document.createElement("td");
+
+            td.className = "giorno";
+
+
+            const chiave =
+                dipendente.id +
+                "_" +
+                anno +
+                "-" +
+                String(mese + 1).padStart(2, "0") +
+                "-" +
+                String(giorno).padStart(2, "0");
+
+
+            const assente =
+                assenze[chiave] === true;
+
+
+            if (assente) {
+
+                td.textContent = "A";
+
+                td.classList.add("assente");
+
+                totaleAssenze++;
+
+            } else {
+
+                td.textContent = "✓";
+
+                td.classList.add("presente");
+            }
+
+
+            /* WEEKEND */
+
+            if (
+                data.getDay() === 0 ||
+                data.getDay() === 6
+            ) {
+                td.classList.add("weekend");
+            }
+
+
+            /* OGGI */
+
+            const oggi = new Date();
+
+            if (
+                giorno === oggi.getDate() &&
+                mese === oggi.getMonth() &&
+                anno === oggi.getFullYear()
+            ) {
+                td.classList.add("oggi");
+            }
+
+
+            /* CLICK */
+
+            td.onclick = function() {
+
+                if (assenze[chiave]) {
+
+                    delete assenze[chiave];
+
+                } else {
+
+                    assenze[chiave] = true;
+                }
+
+                salvaDati();
+
+                creaCalendario();
+            };
+
+
+            tr.appendChild(td);
+        }
+
+
+        /* TOTALE */
+
+        const tdTotale =
+            document.createElement("td");
+
+        tdTotale.className = "totale";
+
+        tdTotale.textContent =
+            totaleAssenze;
+
+        if (totaleAssenze > 0) {
+            tdTotale.style.color = "#dc3545";
+        } else {
+            tdTotale.style.color = "#198754";
+        }
+
+        tr.appendChild(tdTotale);
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+/* ============================
+   CAMBIO MESE
+============================ */
+
+function mesePrecedente() {
+
+    dataCorrente.setMonth(
+        dataCorrente.getMonth() - 1
+    );
+
+    creaCalendario();
+}
+
+
+function meseSuccessivo() {
+
+    dataCorrente.setMonth(
+        dataCorrente.getMonth() + 1
+    );
+
+    creaCalendario();
+}
+
+
+function tornaAlMeseCorrente() {
+
+    dataCorrente = new Date();
+
+    creaCalendario();
+}
+
+
+/* ============================
+   PROTEZIONE TESTO
+============================ */
+
+function escapeHtml(testo) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = testo;
+
+    return div.innerHTML;
+}
+
+
+/* ============================
+   AVVIO
+============================ */
+
+creaCalendario();
+
+
+/* Invio per aggiungere dipendente */
+
+document
+    .getElementById("nomeDipendente")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            aggiungiDipendente();
+        }
+
+    });
+
+</script>
+
+
+</body></html>
